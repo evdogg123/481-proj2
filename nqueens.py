@@ -40,6 +40,7 @@ def revise(problem, col_a, col_b):
     constraints = []
     a_num = 0
     b_num = 1
+    domain_a_temp = []
     domain_len = len(problem["variables"][queen_a])
 
     if get_pair_key(queen_a, queen_b) in problem["constraints"]:
@@ -49,14 +50,21 @@ def revise(problem, col_a, col_b):
         a_num = 1
         b_num = 0
 
-    for constraint in constraints:
-        if constraint[b_num] not in problem["variables"][queen_b]:
-            problem["variables"][queen_a] = list(filter(lambda x: x != constraint[a_num], problem["variables"][queen_a]))
+    for a_loc in problem["variables"][queen_a]:
+        #Not a great implementation, can just iterate over constraints with extra book keeping
+        for constraint in constraints:
+            if constraint[a_num] == a_loc and constraint[b_num] in problem["variables"][queen_b]:
+                #Found a matching element in queen_b's domain to satisfy constraint for loc_a
+                #Add a_loc to queen_a's domain
+                domain_a_temp.append(a_loc)
+                break
+    problem["variables"][queen_a] = domain_a_temp
+    return (len(domain_a_temp) != domain_len, problem )
     
-    return (domain_len != len(problem["variables"][queen_a]), problem)
+        
 
 problem = init_problem(4)
-problem["variables"][get_queen(1)] =[ i for i in problem["variables"][get_queen(0)] if i != 2]
+problem["variables"][get_queen(1)] =[ i for i in problem["variables"][get_queen(0)] if i != 2 and i != 3]
 print(problem["variables"][get_queen(1)])
 removed, new_problem = revise(problem, 0, 1)
 print(removed)
